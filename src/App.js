@@ -9,7 +9,7 @@ import {
   getFirestore,
 } from "firebase/firestore";
 import db from "./firebase";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 function App() {
   const solutions = collection(db, "solutions");
   const submissions = collection(db, "submissions");
@@ -97,6 +97,39 @@ function App() {
     // submitDb(e.pageX, e.pageY);
   };
 
+  const [anchorPoint, setAnchorPoint] = useState({ x: 0, y: 0 });
+  const [show, setShow] = useState(false); // hide menu
+
+  const handleContextMenu = useCallback(
+    (event) => {
+      event.preventDefault();
+      setAnchorPoint({ x: event.pageX, y: event.pageY });
+      setShow(true);
+    },
+    [setAnchorPoint]
+  );
+
+  // const handleClick = useCallback(() => (show ? setShow(false) : null), [show]);
+  const handleClick = useCallback(
+    (e) => {
+      if (show) {
+        setShow(false);
+      } else {
+        handleContextMenu(e);
+      }
+      // return show ? setShow(false) : null;
+    },
+    [show]
+  );
+
+  // use state to determine whether or not handleClick should open contextmenu or click
+  useEffect(() => {
+    document.addEventListener("click", handleClick);
+    return () => {
+      document.removeEventListener("click", handleClick);
+    };
+  });
+
   return (
     <div className="App" onClick={clickScreen}>
       <Header></Header>
@@ -116,6 +149,50 @@ function App() {
         Coordinates: X: {coordinates[0]}, Y: {coordinates[1]}
       </div>
       <header className="App-header">
+        <h1>Right click somewhere on the page..</h1>
+        {show ? (
+          <ul
+            className="menu"
+            style={{
+              top: anchorPoint.y,
+              left: anchorPoint.x,
+            }}
+          >
+            <li
+              onClick={() => {
+                console.log("Share");
+              }}
+            >
+              Share to..
+            </li>
+            <li
+              onClick={() => {
+                console.log("Cut");
+              }}
+            >
+              Cut
+            </li>
+            <li
+              onClick={() => {
+                console.log("Copy");
+              }}
+            >
+              Copy
+            </li>
+            <li
+              onClick={() => {
+                console.log("Paste");
+              }}
+            >
+              Paste
+            </li>
+            <hr className="divider" />
+            <li>Refresh</li>
+            <li>Exit</li>
+          </ul>
+        ) : (
+          <> </>
+        )}
         <img src={logo} className="App-logo" alt="logo" />
         <p>
           Edit <code>src/App.js</code> and save to reload.
