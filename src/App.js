@@ -19,6 +19,7 @@ function App() {
   // posts/postA/comments/commentA
 
   const [solutionDB, setSolutionDB] = useState({});
+  const [characters, setCharacters] = useState([]);
   const [level, setLevel] = useState(0);
   const [anchorPoint, setAnchorPoint] = useState({ x: 0, y: 0 });
   const [show, setShow] = useState(false); // hide menu
@@ -30,11 +31,13 @@ function App() {
 
   const fetchSolutions = async (level) => {
     const solutionSnapshot = await getDocs(solutions);
+    let chars = [];
     solutionSnapshot.forEach((doc) => {
-      console.log(doc.id);
-      console.log(doc.data());
-      // console.log(doc.data()?.x);
+      // console.log(doc.id);
+      // console.log(doc.data());
+      chars = [...chars, doc.id];
     });
+    setCharacters(chars);
     setSolutionDB(solutionSnapshot);
   };
   useEffect(() => {
@@ -87,6 +90,7 @@ function App() {
     } else {
       console.log("Not epic!");
     }
+    setShow(false);
   };
 
   // should be able to use this context menu to determine the spot of waldo and submit it instead of separating them
@@ -153,7 +157,15 @@ function App() {
           </div>
         )}
       </div>
-      {show ? <ContextMenu anchorPoint={anchorPoint}></ContextMenu> : <> </>}
+      {show ? (
+        <ContextMenu
+          anchorPoint={anchorPoint}
+          characters={characters}
+          submitAnswer={submitAnswer}
+        ></ContextMenu>
+      ) : (
+        <> </>
+      )}
     </div>
   );
 }
