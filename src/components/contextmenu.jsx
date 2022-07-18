@@ -44,9 +44,11 @@ function ContextMenu(props) {
               className="hoverAnimation"
               key={character}
               onClick={() =>
-                props.submitAnswer(props.anchorPoint.x, props.anchorPoint.y, {
-                  character,
-                })
+                props.submitAnswer(
+                  props.anchorPoint.x,
+                  props.anchorPoint.y,
+                  character
+                )
               }
             >
               {character}

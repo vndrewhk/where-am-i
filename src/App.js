@@ -15,6 +15,9 @@ import ContextMenu from "./components/contextmenu";
 import LevelSelect from "./components/levelSelect";
 import GameScreen from "./components/gameScreen";
 import leagueWaldo from "./assets/league_waldo.jpeg";
+import Modal from "./components/Modal";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 function App() {
   // posts/postA/comments/commentA
 
@@ -23,7 +26,11 @@ function App() {
   const [level, setLevel] = useState(0);
   const [anchorPoint, setAnchorPoint] = useState({ x: 0, y: 0 });
   const [show, setShow] = useState(false); // hide menu
-  const [firstClicked, setFirstClicked] = useState(false);
+  // const [firstClicked, setFirstClicked] = useState(true);
+  // if false, no modal, if true, check which one it is (correct,incorrect) then return that modal
+  const [answerModal, setAnswerModal] = useState(false);
+  const [finalModal, setFinalModal] = useState(false);
+
   const levels = [null, leagueWaldo];
 
   const solutions = collection(db, `level/${level}/solutions`);
@@ -68,7 +75,7 @@ function App() {
     return correctAnswer;
   };
 
-  const submitDb = async (x, y, character) => {
+  const submitDb = async (x, y, character, correct) => {
     try {
       const docRef = await addDoc(
         collection(db, `level/${level}/submissions`),
@@ -76,6 +83,7 @@ function App() {
           character,
           x,
           y,
+          correct,
         }
       );
     } catch (e) {
@@ -83,14 +91,19 @@ function App() {
     }
   };
 
+  // here we also want to update whether or not it was correct or incorrect
   const submitAnswer = async (x, y, character) => {
-    submitDb(x, y, character);
     if (validate({ x, y }, solutionDB)) {
       console.log("Epic!");
+      submitDb(x, y, character, true);
+      successPopup(character);
+      setShow(false);
     } else {
       console.log("Not epic!");
+      submitDb(x, y, character, false);
+      errorPopup(character);
+      setShow(false);
     }
-    setShow(false);
   };
 
   // should be able to use this context menu to determine the spot of waldo and submit it instead of separating them
@@ -113,13 +126,12 @@ function App() {
         } else {
           handleContextMenu(e);
         }
+        // } else {
+        //   setFirstClicked(true);
+        // }
       }
-      // else {
-      //   setFirstClicked(true);
-      // }
-      // }
     },
-    [show, level, firstClicked]
+    [show, level]
   );
 
   const changeLevel = (level) => {
@@ -127,18 +139,43 @@ function App() {
     setLevel(level);
   };
 
-  // use state to determine whether or not handleClick should open contextmenu or click
-  // useEffect(() => {
-  //   document.addEventListener("click", handleClick);
-  //   return () => {
-  //     document.removeEventListener("click", handleClick);
-  //   };
-  // });
-
+  const successPopup = (character) =>
+    toast.success(`You found ${character}!`, {
+      position: "bottom-center",
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+    });
+  const errorPopup = (character) =>
+    toast.error(`That wasn't ${character}. Try again!`, {
+      position: "bottom-center",
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+    });
   return (
     <div className="h-full w-full">
       <div className="flex flex-col justify-center items-center w-full h-full">
         <Header></Header>
+        <div>
+          <ToastContainer
+            position="top-center"
+            autoClose={5000}
+            hideProgressBar={false}
+            newestOnTop={false}
+            closeOnClick
+            rtl={false}
+            pauseOnFocusLoss
+            draggable
+            pauseOnHover
+          />
+        </div>
         <LevelSelect changeLevel={changeLevel}></LevelSelect>
         <div>
           Coordinates: X: {anchorPoint.x}, Y: {anchorPoint.y} Level: {level}
@@ -156,6 +193,7 @@ function App() {
             <GameScreen map={levels[level]}></GameScreen>
           </div>
         )}
+        {finalModal && <Modal setModal={setFinalModal}></Modal>}
       </div>
       {show ? (
         <ContextMenu
