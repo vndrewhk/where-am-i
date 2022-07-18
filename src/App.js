@@ -64,14 +64,18 @@ function App() {
 
     let correctAnswer = false;
     solutionSnapshot.forEach((doc) => {
+      // console.log(doc.id);
+      // console.log(submission.character);
       if (
         validateNumber(submission.x, doc.data()?.x, margin) &&
         validateNumber(submission.y, doc.data()?.y, margin) &&
-        doc.data()?.name == submission.name
+        doc.id == submission.character
       ) {
+        // console.log(doc.id);
         correctAnswer = true;
       }
     });
+
     return correctAnswer;
   };
 
@@ -93,11 +97,17 @@ function App() {
 
   // here we also want to update whether or not it was correct or incorrect
   const submitAnswer = async (x, y, character) => {
-    if (validate({ x, y }, solutionDB)) {
+    if (validate({ x, y, character }, solutionDB)) {
       console.log("Epic!");
+      // here we should remove the character from the list of solutions
+
+      // const result = words.filter(word => word.length > 6);
       submitDb(x, y, character, true);
       successPopup(character);
       setShow(false);
+      setCharacters(
+        characters.filter((characterName) => characterName !== character)
+      );
     } else {
       console.log("Not epic!");
       submitDb(x, y, character, false);
