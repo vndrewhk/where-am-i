@@ -3,6 +3,8 @@ import { useEffect, useState } from "react";
 import db from "../firebase";
 function ContextMenu(props) {
   let characters = props.characters;
+  //   let margin = props.margin;
+  let margin = 35;
   //   console.log(characters);
   //   console.log(typeof characters);
 
@@ -19,21 +21,21 @@ function ContextMenu(props) {
       <div
         className="menu-circle"
         style={{
-          top: props.anchorPoint.y - 25,
+          top: props.anchorPoint.y - margin,
           left:
             props.anchorPoint.x < window.screen.width / 2
-              ? props.anchorPoint.x - 25
-              : props.anchorPoint.x - 25,
+              ? props.anchorPoint.x - margin
+              : props.anchorPoint.x - margin,
         }}
       ></div>
       <ul
         className="menu"
         style={{
-          top: props.anchorPoint.y - 25,
+          top: props.anchorPoint.y - margin,
           left:
             props.anchorPoint.x < window.screen.width / 2
-              ? props.anchorPoint.x + 25
-              : props.anchorPoint.x - 175,
+              ? props.anchorPoint.x + margin
+              : props.anchorPoint.x - (200 - margin),
         }}
       >
         {/* map over props */}
@@ -42,16 +44,16 @@ function ContextMenu(props) {
           characters.map((character) => (
             <li
               className="hoverAnimation"
-              key={character}
+              key={character.name}
               onClick={() =>
                 props.submitAnswer(
-                  props.anchorPoint.x,
-                  props.anchorPoint.y,
-                  character
+                  props.coordinates.x,
+                  props.coordinates.y,
+                  character.name
                 )
               }
             >
-              {character}
+              {character.name}
             </li>
           ))}
       </ul>

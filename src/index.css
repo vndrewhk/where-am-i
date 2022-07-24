@@ -10,6 +10,13 @@
   .hoverAnimation {
     @apply hover:bg-gray-200 cursor-pointer;
   }
+
+  .cardHover {
+    @apply transform h-64 bg-blue-400 w-1/5 hover:bg-blue-600 transition  duration-300  hover:scale-105;
+  }
+  .buttonHover {
+    @apply transform transition duration-75 hover:scale-110;
+  }
 }
 
 body {
@@ -48,19 +55,18 @@ code {
   border-radius: 2px;
   border: black;
   padding: 5px 0 5px 0;
-  width: 150px;
-  height: auto;
   margin: 0;
   /* use absolute positioning  */
   position: absolute;
   list-style: none;
   /* box-shadow: 0 0 20px 0 #ccc; */
-  border: 2px solid black;
+  border: 2px dashed black;
+  background-color: rgba(217, 189, 203, 0.5);
   opacity: 1;
   transition: opacity 0.5s linear;
   color: black;
-  height: 50px;
-  width: 50px;
-  background-color: transparent;
+  height: 70px;
+  width: 70px;
+  /* background-color: transparent; */
   border-radius: 50%;
 }

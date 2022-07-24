@@ -15,9 +15,11 @@ import ContextMenu from "./components/contextmenu";
 import LevelSelect from "./components/levelSelect";
 import GameScreen from "./components/gameScreen";
 import leagueWaldo from "./assets/league_waldo.jpeg";
+import overwatchWaldo from "./assets/overwatch.jpeg";
 import Modal from "./components/Modal";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { useStopwatch } from "react-timer-hook";
 function App() {
   // posts/postA/comments/commentA
 
@@ -25,13 +27,18 @@ function App() {
   const [characters, setCharacters] = useState([]);
   const [level, setLevel] = useState(0);
   const [anchorPoint, setAnchorPoint] = useState({ x: 0, y: 0 });
+  const [coordinates, setCoordinates] = useState({ x: 0, y: 0 });
   const [show, setShow] = useState(false); // hide menu
   // const [firstClicked, setFirstClicked] = useState(true);
   // if false, no modal, if true, check which one it is (correct,incorrect) then return that modal
   const [answerModal, setAnswerModal] = useState(false);
   const [finalModal, setFinalModal] = useState(false);
 
-  const levels = [null, leagueWaldo];
+  const { seconds, minutes, hours, days, isRunning, start, pause, reset } =
+    useStopwatch({ autoStart: true });
+
+  const levels = [null, leagueWaldo, overwatchWaldo];
+  let margin = 2;
 
   const solutions = collection(db, `level/${level}/solutions`);
   const submissions = collection(db, `level/${level}/submissions`);
@@ -41,8 +48,12 @@ function App() {
     let chars = [];
     solutionSnapshot.forEach((doc) => {
       // console.log(doc.id);
-      // console.log(doc.data());
-      chars = [...chars, doc.id];
+      console.log("fetching");
+      console.log(doc.data());
+      let id = doc.id;
+      let icon = doc.data().icon;
+      // chars = [...chars,doc.id]
+      chars = [...chars, { name: id, icon: icon }];
     });
     setCharacters(chars);
     setSolutionDB(solutionSnapshot);
@@ -60,9 +71,8 @@ function App() {
   };
 
   const validate = (submission, solutionSnapshot) => {
-    let margin = 25;
-
     let correctAnswer = false;
+    console.log(margin);
     solutionSnapshot.forEach((doc) => {
       // console.log(doc.id);
       // console.log(submission.character);
@@ -106,7 +116,7 @@ function App() {
       successPopup(character);
       setShow(false);
       setCharacters(
-        characters.filter((characterName) => characterName !== character)
+        characters.filter((characterName) => characterName.name !== character)
       );
     } else {
       console.log("Not epic!");
@@ -121,9 +131,33 @@ function App() {
     (event) => {
       event.preventDefault();
       setAnchorPoint({ x: event.pageX, y: event.pageY });
+      // use this instead, have to update margin tho
+      // we'll use this for the actual validation rather than the context menu though
+      console.log(
+        Math.round(
+          (event.nativeEvent.offsetX / event.nativeEvent.target.offsetWidth) *
+            100
+        )
+      );
+      console.log(
+        Math.round(
+          (event.nativeEvent.offsetY / event.nativeEvent.target.offsetHeight) *
+            100
+        )
+      );
+      setCoordinates({
+        x: Math.round(
+          (event.nativeEvent.offsetX / event.nativeEvent.target.offsetWidth) *
+            100
+        ),
+        y: Math.round(
+          (event.nativeEvent.offsetY / event.nativeEvent.target.offsetHeight) *
+            100
+        ),
+      });
       setShow(true);
     },
-    [setAnchorPoint]
+    [setAnchorPoint, setCoordinates]
   );
 
   // const handleClick = useCallback(() => (show ? setShow(false) : null), [show]);
@@ -146,6 +180,14 @@ function App() {
 
   const changeLevel = (level) => {
     // setFirstClicked(false);
+    if (level == 0) {
+      reset();
+      pause();
+    }
+    if (level != 0) {
+      reset();
+      start();
+    }
     setLevel(level);
   };
 
@@ -169,35 +211,63 @@ function App() {
       draggable: true,
       progress: undefined,
     });
+
+  if (level === 0) {
+    return (
+      <div className="h-[100vh] w-[100vw]">
+        <div className="flex flex-col justify-center items-center w-full h-full">
+          <Header level={level} characters={characters}></Header>
+          <div className="h-full w-full flex justify-center items-center">
+            <LevelSelect
+              changeLevel={changeLevel}
+              card={true}
+              levels={levels.slice(1)}
+            ></LevelSelect>
+          </div>
+        </div>
+      </div>
+    );
+  }
+  // WITH LEVEL
   return (
     <div className="h-full w-full">
       <div className="flex flex-col justify-center items-center w-full h-full">
-        <Header></Header>
-        <div>
-          <ToastContainer
-            position="top-center"
-            autoClose={5000}
-            hideProgressBar={false}
-            newestOnTop={false}
-            closeOnClick
-            rtl={false}
-            pauseOnFocusLoss
-            draggable
-            pauseOnHover
-          />
+        <div className="sticky top-0 w-full bg-white border-b border-b-gray-200 pb-4  mx-auto">
+          <Header
+            level={level}
+            characters={characters}
+            changeLevel={changeLevel}
+            seconds={seconds}
+            minutes={minutes}
+            hours={hours}
+            days={days}
+            isRunning={isRunning}
+            start={start}
+            pause={pause}
+            reset={reset}
+          >
+            <LevelSelect changeLevel={changeLevel}></LevelSelect>
+          </Header>
+          <div>
+            <ToastContainer
+              position="top-center"
+              autoClose={5000}
+              hideProgressBar={false}
+              newestOnTop={false}
+              closeOnClick
+              rtl={false}
+              pauseOnFocusLoss
+              draggable
+              pauseOnHover
+            />
+          </div>
+          {/* <div>
+            Coordinates: X: {anchorPoint.x}, Y: {anchorPoint.y} Level: {level}
+          </div> */}
         </div>
-        <LevelSelect changeLevel={changeLevel}></LevelSelect>
-        <div>
-          Coordinates: X: {anchorPoint.x}, Y: {anchorPoint.y} Level: {level}
-        </div>
-        <button
-          onClick={() => submitAnswer(anchorPoint.x, anchorPoint.y, "Jinx")}
-        >
-          Submit Answer
-        </button>
         {level > 0 && (
           <div
-            className="w-[100vw] min-h-[90vh] h-full select-none"
+            className="w-[100vw] min-h-[90vh] h-full select-none transition-all duration-1000 ease-in-out"
             onClick={handleClick}
           >
             <GameScreen map={levels[level]}></GameScreen>
@@ -208,8 +278,10 @@ function App() {
       {show ? (
         <ContextMenu
           anchorPoint={anchorPoint}
+          coordinates={coordinates}
           characters={characters}
           submitAnswer={submitAnswer}
+          margin={margin}
         ></ContextMenu>
       ) : (
         <> </>
