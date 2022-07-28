@@ -30,7 +30,7 @@ function Leaderboards({ level }) {
   }, [db]);
 
   return (
-    <div className="w-[45vw] h-[40vh] overflow-y-scroll overflow-x-hidden">
+    <div className="w-[30vw] h-[40vh] overflow-y-scroll overflow-x-hidden">
       <div className=" px-28 flex justify-between text-xl font-extrabold text-cyan-600 border-b-cyan-600 border-b pt-4 pb-2 mb-2">
         <div>Name</div>
         <div>Seconds</div>
