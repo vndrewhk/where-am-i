@@ -6,7 +6,7 @@ function LevelSelect({ changeLevel, card, levels }) {
   if (card === true) {
     console.log(levels);
     return (
-      <div className="flex  gap-x-10">
+      <div className="flex  gap-x-10 ">
         {levels.length > 0 &&
           levels.map((level, index) => (
             <Tooltip content={"Level " + (index + 1)}>

@@ -1,6 +1,7 @@
 import logo from "./logo.svg";
 import "./App.css";
 import Header from "./components/header";
+import HelpModal from "./components/HelpModal";
 import {
   addDoc,
   collection,
@@ -32,6 +33,7 @@ function App() {
   // const [firstClicked, setFirstClicked] = useState(true);
   // if false, no modal, if true, check which one it is (correct,incorrect) then return that modal
   const [answerModal, setAnswerModal] = useState(false);
+  const [helpModal, setHelpModal] = useState(false);
   const [finalModal, setFinalModal] = useState(false);
 
   const { seconds, minutes, hours, days, isRunning, start, pause, reset } =
@@ -104,6 +106,25 @@ function App() {
       console.error("Error adding document: " + e);
     }
   };
+  const submitTime = async (time, name) => {
+    try {
+      // custom id
+      //   db.collection("cities").doc("LA").set({
+      //     name: "Los Angeles",
+      //     state: "CA",
+      //     country: "USA"
+      // })
+      const docRef = await addDoc(
+        collection(db, `level/${level}/leaderboard`),
+        {
+          time,
+          name,
+        }
+      );
+    } catch (e) {
+      console.log("Error adding score");
+    }
+  };
 
   // here we also want to update whether or not it was correct or incorrect
   const submitAnswer = async (x, y, character) => {
@@ -115,6 +136,13 @@ function App() {
       submitDb(x, y, character, true);
       successPopup(character);
       setShow(false);
+
+      if (
+        characters.filter((characterName) => characterName.name !== character)
+          .length == 0
+      ) {
+        setFinalModal(true);
+      }
       setCharacters(
         characters.filter((characterName) => characterName.name !== character)
       );
@@ -131,20 +159,6 @@ function App() {
     (event) => {
       event.preventDefault();
       setAnchorPoint({ x: event.pageX, y: event.pageY });
-      // use this instead, have to update margin tho
-      // we'll use this for the actual validation rather than the context menu though
-      console.log(
-        Math.round(
-          (event.nativeEvent.offsetX / event.nativeEvent.target.offsetWidth) *
-            100
-        )
-      );
-      console.log(
-        Math.round(
-          (event.nativeEvent.offsetY / event.nativeEvent.target.offsetHeight) *
-            100
-        )
-      );
       setCoordinates({
         x: Math.round(
           (event.nativeEvent.offsetX / event.nativeEvent.target.offsetWidth) *
@@ -214,16 +228,21 @@ function App() {
 
   if (level === 0) {
     return (
-      <div className="h-[100vh] w-[100vw]">
+      <div className="h-[100vh] w-[100vw] ">
         <div className="flex flex-col justify-center items-center w-full h-full">
-          <Header level={level} characters={characters}></Header>
-          <div className="h-full w-full flex justify-center items-center">
+          <Header
+            level={level}
+            characters={characters}
+            setHelpModal={setHelpModal}
+          ></Header>
+          <div className="h-full w-full flex justify-center items-center  bg-gradient-to-r from-rose-100 to-teal-100">
             <LevelSelect
               changeLevel={changeLevel}
               card={true}
               levels={levels.slice(1)}
             ></LevelSelect>
           </div>
+          {helpModal && <HelpModal setHelpModal={setHelpModal}></HelpModal>}
         </div>
       </div>
     );
@@ -232,7 +251,8 @@ function App() {
   return (
     <div className="h-full w-full">
       <div className="flex flex-col justify-center items-center w-full h-full">
-        <div className="sticky top-0 w-full bg-white border-b border-b-gray-200 pb-4  mx-auto">
+        <div className="sticky top-0 w-full bg-white border-b border-b-gray-200 pb-4  mx-auto bg-teal-50">
+          {/* <button onClick={() => setFinalModal(true)}>end game</button> */}
           <Header
             level={level}
             characters={characters}
@@ -245,9 +265,12 @@ function App() {
             start={start}
             pause={pause}
             reset={reset}
+            setHelpModal={setHelpModal}
           >
             <LevelSelect changeLevel={changeLevel}></LevelSelect>
           </Header>
+          {helpModal && <HelpModal setHelpModal={setHelpModal}></HelpModal>}
+
           <div>
             <ToastContainer
               position="top-center"
@@ -271,15 +294,32 @@ function App() {
             onClick={handleClick}
           >
             <GameScreen map={levels[level]}></GameScreen>
+            {helpModal && <HelpModal setHelpModal={setHelpModal}></HelpModal>}
           </div>
         )}
-        {finalModal && <Modal setModal={setFinalModal}></Modal>}
+        {finalModal && (
+          <Modal
+            setModal={setFinalModal}
+            seconds={seconds}
+            minutes={minutes}
+            hours={hours}
+            days={days}
+            isRunning={isRunning}
+            start={start}
+            pause={pause}
+            reset={reset}
+            changeLevel={changeLevel}
+            submitTime={submitTime}
+            level={level}
+          ></Modal>
+        )}
       </div>
       {show ? (
         <ContextMenu
           anchorPoint={anchorPoint}
           coordinates={coordinates}
           characters={characters}
+          setModal={setFinalModal}
           submitAnswer={submitAnswer}
           margin={margin}
         ></ContextMenu>

@@ -1,5 +1,5 @@
 import { Typography } from "@mui/material";
-import React from "react";
+import React, { useState } from "react";
 import "@fontsource/roboto/300.css";
 import "@fontsource/roboto/400.css";
 import "@fontsource/roboto/500.css";
@@ -23,6 +23,7 @@ export default function Header({
   start,
   pause,
   reset,
+  setHelpModal,
 }) {
   //   const { seconds, minutes, hours, days, isRunning, start, pause, reset } =
   //     useStopwatch({ autoStart: true });
@@ -46,23 +47,27 @@ export default function Header({
   );
   if (level == 0) {
     return (
-      <div className="border-b-gray-200 border-b w-full  pt-2 ">
+      <div className="border-b-gray-200 border-b w-full  pt-2 pb-2 bg-teal-50">
         <div className="flex items-center justify-center">{headerTitle}</div>
         {children}
         <div className="absolute right-5 top-5 cursor-pointer buttonHover">
           <PaddedTooltip content="Help">
-            <HelpOutlineIcon></HelpOutlineIcon>
+            <HelpOutlineIcon
+              onClick={() => setHelpModal(true)}
+            ></HelpOutlineIcon>
           </PaddedTooltip>
         </div>
       </div>
     );
   }
   return (
-    <div className="w-full">
+    <div className="w-full ">
       <div className="flex items-center  justify-around  w-full pt-2">
         <div className="absolute right-5 top-5 cursor-pointer buttonHover">
           <PaddedTooltip content="Help">
-            <HelpOutlineIcon></HelpOutlineIcon>
+            <HelpOutlineIcon
+              onClick={() => setHelpModal(true)}
+            ></HelpOutlineIcon>
           </PaddedTooltip>
         </div>
         <div
