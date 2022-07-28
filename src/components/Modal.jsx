@@ -34,12 +34,16 @@ export default function Modal({
     // setModal(false);
     setPostModal(true);
   };
-  useEffect(() => {
-    // first;
+  // useEffect(() => {
+  //   // first;
 
-    return () => {
-      pause();
-    };
+  //   return () => {
+  //     pause();
+  //   };
+  // }, []);
+  useEffect(() => {
+    console.log("pausing");
+    pause();
   }, []);
 
   const resetLevel = () => {
