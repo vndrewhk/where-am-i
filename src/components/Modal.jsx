@@ -139,7 +139,7 @@ export default function Modal({
                   onChange={(e) => handleInput(e)}
                   value={input}
                   placeholder="Username"
-                  className="ml-auto mr-auto px-5 bg-transparent outline-none  text-black inset-0   border-2  border-teal-200  rounded-xl w-full p-2  shadow-lg"
+                  className="ml-auto mr-auto px-5 bg-transparent outline-none  text-black inset-0   border-2  border-teal-200  rounded-xl w-full p-2  shadow-lg w-[35vw]"
                 ></input>
               </form>{" "}
               {/* ladderboards */}
